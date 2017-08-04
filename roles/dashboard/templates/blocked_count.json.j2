@@ -1,0 +1,10 @@
+{
+    "title": "Blocked Count",
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{},\"schema\":\"metric\",\"type\":\"count\"}],\"listeners\":{},\"params\":{\"fontSize\":60,\"handleNoResults\":true},\"title\":\"Blocked Count\",\"type\":\"metric\"}",
+    "uiStateJSON": "{}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"nf_action: reject and nf_in_interface: {{ openwrt_wan_eth }}\"}},\"filter\":[]}"
+    }
+}

@@ -1,0 +1,3 @@
+IPTABLESV4 ((%{WORD:nf_action})\(.*\)\(?.*IN=(%{USERNAME:nf_in_interface})?.*OUT=(%{USERNAME:nf_out_interface})?.*MAC=(%{COMMONMAC:nf_dst_mac}):(%{COMMONMAC:nf_src_mac})?.*SRC=(%{IPV4:nf_src_ip}).*DST=(%{IPV4:nf_dst_ip}).*PROTO=(%{WORD:nf_protocol}).?*SPT=(%{INT:nf_src_port}?.*DPT=%{INT:nf_dst_port}?.*))
+IPTABLESV6 ((%{WORD:nf_action})\(.*\)\(?.*IN=(%{USERNAME:nf_in_interface})?.*OUT=(%{USERNAME:nf_out_interface})?.*MAC=(%{COMMONMAC:nf_dst_mac}):(%{COMMONMAC:nf_src_mac})?.*SRC=(%{IPV6:nf_src_ip}).*DST=(%{IPV6:nf_dst_ip}).*PROTO=(%{WORD:nf_protocol}).?*SPT=(%{INT:nf_src_port}?.*DPT=%{INT:nf_dst_port}?.*))
+

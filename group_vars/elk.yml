@@ -1,0 +1,10 @@
+---
+nginx_kibana_port: 80
+nginx_user: www-data
+kibana_user: kibana
+# generate with "openssl passwd -apr1" - this hash is "default"
+kibana_pwhash: "$apr1$E/IbaHil$M0VZ7HtJY82U/CR/et72U."
+openwrt_lan_ip: 192.168.1.1
+openwrt_wan_eth: eth0
+openwrt_wan_snmp_index: 2
+

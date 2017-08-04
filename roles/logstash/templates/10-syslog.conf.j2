@@ -1,0 +1,13 @@
+filter {
+  if [type] == "syslog" {
+    if [host] =~ /{{ openwrt_lan_ip | regex_replace('\.', '\\\.')}}/ {
+      mutate {
+        add_tag => ["openwrt"]
+      }
+    }
+    grok {
+      match => { "message" => "%{SYSLOGBASE}" }
+    }
+  }
+}
+

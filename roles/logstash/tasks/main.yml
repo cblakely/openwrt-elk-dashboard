@@ -1,0 +1,77 @@
+---
+- name: enable haveged
+  systemd:
+    name: haveged
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: create patterns directory
+  file:
+    dest: /etc/logstash/conf.d/patterns
+    state: directory
+
+- name: logstash input/output configuration
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/logstash/conf.d/{{ item }}"
+  with_items:
+    - 01-inputs.conf
+    - 90-outputs.conf
+  register: logstash_conf_copy
+
+- name: logstash filter configuration
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/logstash/conf.d/{{ item }}"
+  with_items:
+    - 10-syslog.conf
+    - 20-netflow.conf
+    - 30-openwrt.conf
+  register: logstash_conf_temp
+
+- name: logstash pattern files
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/logstash/conf.d/patterns/{{ item }}"
+  with_items:
+    - dhcp.grok
+    - iptables.grok
+  register: pattern_conf
+
+- name: download maxmind geoip database
+  get_url:
+    url: http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
+    dest: /tmp/GeoLite2-City.mmdb.gz
+  register: geoip_db_dl
+
+- name: extract geoip database
+  shell: 'gunzip < /tmp/GeoLite2-City.mmdb.gz > /etc/logstash/GeoLite2-City.mmdb'
+  when: geoip_db_dl|changed
+
+- name: check logstash filter list
+  shell: /usr/share/logstash/bin/logstash-plugin list
+  changed_when: false
+  register: logstash_plugins
+
+- name: install logstash translate filter plugin
+  shell: /usr/share/logstash/bin/logstash-plugin install logstash-filter-translate
+  when: ("logstash-filter-translate" not in logstash_plugins.stdout)
+  register: logstash_translate_install
+
+- name: Start Logstash service
+  systemd:
+    name: logstash
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  register: logstash_service
+
+- name: Restart Logstash service
+  systemd:
+    name: logstash
+    state: restarted
+  when:
+    - (logstash_conf_copy|changed) or (logstash_conf_temp|changed) or (pattern_conf|changed) or (logstash_translate_install|changed)
+    - not logstash_service|changed
+

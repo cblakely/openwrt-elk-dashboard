@@ -1,0 +1,51 @@
+filter {
+  if "openwrt" in [tags] {
+    if [program] == "kernel" {
+      if [message] =~ /SRC=[0-9a-f:]+\s/ {
+        grok {
+          patterns_dir => [ "/etc/logstash/conf.d/patterns" ]
+          match => [ "message", "%{IPTABLESV6}" ]
+          add_field => { "ip_ver" => "6" }
+        }
+      }
+      else {
+        grok {
+          patterns_dir => [ "/etc/logstash/conf.d/patterns" ]
+          match => [ "message", "%{IPTABLESV4}" ]
+          add_field => { "ip_ver" => "4" }
+        }
+      }
+      date {
+        match => [ "timestamp", "MMM dd HH:mm:ss"]
+        timezone => "America/Los_Angeles"
+      }
+      mutate {
+        lowercase => "nf_protocol"
+        lowercase => "nf_action"
+      }
+      if [nf_in_interface] == "{{ openwrt_wan_eth }}" {
+        geoip {
+          source => "nf_src_ip"
+          database => "/etc/logstash/GeoLite2-City.mmdb"
+        }
+      }
+      else {
+        geoip {
+          source => "nf_dst_ip"
+          database => "/etc/logstash/GeoLite2-City.mmdb"
+        }
+      }
+    }
+    else if [program] == "dnsmasq-dhcp" {
+      grok {
+        patterns_dir => [ "/etc/logstash/conf.d/patterns" ]
+        match => [ "message", "%{DNSMASQ_DHCP}" ]
+      }
+      date {
+        match => [ "timestamp", "MMM dd HH:mm:ss"]
+        timezone => "America/Los_Angeles"
+      }
+    }
+  }
+}
+

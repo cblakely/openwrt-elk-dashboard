@@ -1,0 +1,25 @@
+---
+- name: Updating the config file to restrict outside access
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    regexp: 'network.host:'
+    line: 'network.host: localhost'
+    state: present
+  register: elastic_config
+
+- name: enable Elasticsearch service
+  systemd:
+    name: elasticsearch
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  register: elastic_restart
+
+- name: restart Elasticseatch service
+  systemd:
+    name: elasticsearch
+    state: restarted
+  when:
+   - elastic_config|changed
+   - not elastic_restart|changed
+

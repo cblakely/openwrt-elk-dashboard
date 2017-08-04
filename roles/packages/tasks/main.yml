@@ -1,0 +1,36 @@
+---
+- name: Add Java repository
+  apt_repository:
+    repo: ppa:webupd8team/java
+
+- name: Accept Oracle Java 8 license
+  debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+
+- name: Install apt-transport-https
+  apt:
+    name: apt-transport-https
+    update_cache: yes
+
+- name: Add elastic.co apt-key
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Adding elastic.co 5.x APT repository
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/5.x/apt stable main"
+    state: present
+
+- name: Install Java 8 + ELK packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - oracle-java8-installer
+    - elasticsearch
+    - kibana
+    - nginx
+    - haveged
+    - logstash
+

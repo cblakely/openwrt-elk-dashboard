@@ -1,0 +1,41 @@
+filter {
+  translate {
+    field => "[netflow][protocol]"
+    destination => "[netflow][protocol]"
+    override => "true"
+    dictionary => [ "6", "tcp", "17", "udp", "1", "icmp", "48", "gre", "50", "esp" ]
+  }
+
+  translate {
+    field => "[netflow][input_snmp]"
+    destination => "[netflow][interface_in]"
+    dictionary => [ "{{ openwrt_wan_snmp_index }}", "wan" ]
+    add_field => {
+      direction => "inbound"
+    }
+  }
+
+  translate {
+    field => "[netflow][output_snmp]"
+    destination => "[netflow][interface_out]"
+    dictionary => [ "{{ openwrt_wan_snmp_index }}", "wan" ]
+    add_field => {
+      direction => "outbound"
+    }
+  }
+
+  if [direction] == "inbound" {
+    geoip {
+      source => "[netflow][ipv4_src_addr]"
+      database => "/etc/logstash/GeoLite2-City.mmdb"
+    }
+  }
+
+  if [direction] == "outbound" {
+    geoip {
+      source => "[netflow][ipv4_dst_addr]"
+      database => "/etc/logstash/GeoLite2-City.mmdb"
+    }
+  }
+}
+

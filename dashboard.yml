@@ -1,0 +1,7 @@
+---
+- hosts: elk
+  become: yes
+  become_user: root
+  roles:
+    - { role: dashboard, tags: dashboard }
+

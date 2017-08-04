@@ -1,0 +1,10 @@
+---
+- hosts: elk
+  become: yes
+  become_user: root
+  roles:
+    - { role: packages, tags: packages }
+    - { role: elasticsearch, tags: es }
+    - { role: logstash, tags: logstash }
+    - { role: kibana, tags: kibana }
+

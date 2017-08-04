@@ -1,0 +1,2 @@
+DNSMASQ_DHCP (%{WORD:dhcp_action}\(%{WORD:dhcp_interface}\)\s+%{IPV4:dhcp_client_ip}\s+%{COMMONMAC:dhcp_client_mac})
+

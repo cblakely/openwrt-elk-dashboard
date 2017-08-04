@@ -1,0 +1,62 @@
+---
+- name: Updating the config file to restrict outside access
+  lineinfile:
+    dest: /etc/kibana/kibana.yml
+    regexp: 'server.host:'
+    line: 'server.host: localhost'
+    state: present
+  register: kibana_config
+
+- name: enable kibana service
+  systemd:
+    name: kibana
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  register: kibana_restart
+
+- name: restart Elasticseatch service
+  systemd:
+    name: kibana
+    state: restarted
+  when:
+   - kibana_config|changed
+   - not kibana_restart|changed
+
+- name: Create nginx directory structure
+  file: path=/etc/nginx/conf.d/
+    state=directory
+    mode=0755
+
+- name: Setup Nginx reverse proxy for kibana
+  template:
+    src=kibana.conf.j2
+    dest=/etc/nginx/sites-available/default
+    owner=root
+    group=root
+    mode=0644
+  register: nginx_config
+
+- name: write Kibana user file
+  lineinfile:
+    dest: /etc/nginx/htpasswd.users
+    create: yes
+    regexp: "^{{ kibana_user }}:"
+    line: "{{ kibana_user }}:{{ kibana_pwhash }}"
+  register: nginx_userfile
+
+- name: Enabling Nginx service
+  systemd:
+    name: nginx
+    enabled: yes
+    state: started
+  register: nginx_service
+
+- name: restarting Nginx service
+  systemd:
+    name: nginx
+    state: restarted
+  when:
+    - (nginx_config|changed) or (nginx_userfile|changed)
+    - not nginx_service|changed
+

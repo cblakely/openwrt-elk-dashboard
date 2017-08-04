@@ -1,0 +1,30 @@
+---
+- name: visualization items
+  set_fact:
+    visualizations:
+      - blocked_count
+      - blocked_dest_ports
+      - blocked_ip_version
+      - blocked_map_heatmap
+      - blocked_origin_country
+      - blocked_over_time
+      - blocked_protocol
+      - blocked_top_sources
+
+- name: import visualization objects into elasticsearch
+  uri:
+    url: http://localhost:9200/.kibana/visualization/{{ item }}
+    method: PUT
+    body: "{{ lookup('template', item+'.json.j2') }}"
+    body_format: json
+    status_code: 200,201
+  with_items: "{{ visualizations }}"
+
+- name: import dashboard object into elasticsearch
+  uri:
+    url: http://localhost:9200/.kibana/dashboard/firewall_dashboard
+    method: PUT
+    body: "{{ lookup('file', 'firewall_dashboard.json') }}"
+    body_format: json
+    status_code: 200,201
+
