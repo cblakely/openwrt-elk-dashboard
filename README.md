@@ -27,4 +27,7 @@ This repository contains two playbooks:
 
 ![Kibana Firewall Dashboard](http://i.imgur.com/O29FrXE.png)
 
+### Netflow support
+
+This playbook is configured to also match netflow packets, but setting up netflow exporting on OpenWRT is a little more challenging. See [here](https://github.com/aabc/ipt-netflow/tree/master/openwrt) for more details.
 
